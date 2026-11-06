@@ -43,6 +43,7 @@ def test_estimate_train_happy_path() -> None:
     assert body["cost"]["min_cost_usd"] == body["cost"]["by_provider"][0]["cost_usd"]
     assert body["job"]["n_params"] > 70e9
     assert "model=llama-3-70b" in body["scenario_query"]
+    assert "batch_m=8.388608" in body["scenario_query"]  # exact, so reload keeps divisibility
     assert body["search_time_ms"] < 1000
     assert len(body["alternatives"]) <= 4
 

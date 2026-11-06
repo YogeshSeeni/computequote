@@ -32,20 +32,36 @@ for m in "Alpha (Nov 5)|2026-11-06T07:59:00Z|Early working demo and task backlog
   fi
 done
 
-echo "== project"
-PROJECT_NUMBER=$(gh project list --owner "$OWNER" --format json --jq ".projects[] | select(.title==\"$TITLE\") | .number" | head -1)
-if [ -z "$PROJECT_NUMBER" ]; then
-  PROJECT_NUMBER=$(gh project create --owner "$OWNER" --title "$TITLE" --format json --jq .number)
+echo "== project (needs the project scope; skipped if missing)"
+HAVE_BOARD=0
+if gh project list --owner "$OWNER" --limit 1 >/dev/null 2>&1; then
+  HAVE_BOARD=1
+  PROJECT_NUMBER=$(gh project list --owner "$OWNER" --format json --jq ".projects[] | select(.title==\"$TITLE\") | .number" | head -1)
+  if [ -z "$PROJECT_NUMBER" ]; then
+    PROJECT_NUMBER=$(gh project create --owner "$OWNER" --title "$TITLE" --format json --jq .number)
+  fi
+  gh project edit "$PROJECT_NUMBER" --owner "$OWNER" --visibility PUBLIC \
+    --description "Backlog for ComputeQuote (CS146S final project)" >/dev/null
+  PROJECT_ID=$(gh project view "$PROJECT_NUMBER" --owner "$OWNER" --format json --jq .id)
+  STATUS_FIELD=$(gh project field-list "$PROJECT_NUMBER" --owner "$OWNER" --format json \
+    --jq '.fields[] | select(.name=="Status")')
+  STATUS_FIELD_ID=$(echo "$STATUS_FIELD" | python3 -c 'import sys,json; print(json.load(sys.stdin)["id"])')
+  opt_id() { echo "$STATUS_FIELD" | python3 -c "import sys,json; print([o['id'] for o in json.load(sys.stdin)['options'] if o['name']=='$1'][0])"; }
+  OPT_TODO=$(opt_id "Todo"); OPT_DOING=$(opt_id "In Progress"); OPT_DONE=$(opt_id "Done")
+  echo "project #$PROJECT_NUMBER https://github.com/users/$OWNER/projects/$PROJECT_NUMBER"
+else
+  echo "no project scope: run 'gh auth refresh -s project,read:project' and re-run to build the board"
 fi
-gh project edit "$PROJECT_NUMBER" --owner "$OWNER" --visibility PUBLIC \
-  --description "Backlog for ComputeQuote (CS146S final project)" >/dev/null
-PROJECT_ID=$(gh project view "$PROJECT_NUMBER" --owner "$OWNER" --format json --jq .id)
-STATUS_FIELD=$(gh project field-list "$PROJECT_NUMBER" --owner "$OWNER" --format json \
-  --jq '.fields[] | select(.name=="Status")')
-STATUS_FIELD_ID=$(echo "$STATUS_FIELD" | python3 -c 'import sys,json; print(json.load(sys.stdin)["id"])')
-opt_id() { echo "$STATUS_FIELD" | python3 -c "import sys,json; print([o['id'] for o in json.load(sys.stdin)['options'] if o['name']=='$1'][0])"; }
-OPT_TODO=$(opt_id "Todo"); OPT_DOING=$(opt_id "In Progress"); OPT_DONE=$(opt_id "Done")
-echo "project #$PROJECT_NUMBER https://github.com/users/$OWNER/projects/$PROJECT_NUMBER"
+
+add_to_board() {  # url status
+  [ "$HAVE_BOARD" = 1 ] || return 0
+  item_id=$(gh project item-add "$PROJECT_NUMBER" --owner "$OWNER" --url "$1" --format json --jq .id)
+  case "$2" in
+    Done) opt=$OPT_DONE ;; "In Progress") opt=$OPT_DOING ;; *) opt=$OPT_TODO ;;
+  esac
+  gh project item-edit --project-id "$PROJECT_ID" --id "$item_id" \
+     --field-id "$STATUS_FIELD_ID" --single-select-option-id "$opt" >/dev/null
+}
 
 # status|priority|area|milestone|title|body
 ISSUES=$(cat <<'LIST'
@@ -86,19 +102,19 @@ LIST
 )
 
 echo "== issues"
-existing=$(gh issue list --repo "$REPO" --state all --limit 200 --json title --jq '.[].title')
+existing=$(gh issue list --repo "$REPO" --state all --limit 200 --json title,url --jq '.[] | "\(.title)\t\(.url)"')
 while IFS='|' read -r status priority area milestone title body; do
   [ -z "$title" ] && continue
-  if grep -Fxq "$title" <<<"$existing"; then echo "skip (exists): $title"; continue; fi
-  url=$(gh issue create --repo "$REPO" --title "$title" --body "$body" \
-        --label "priority:$priority" --label "area:$area" --milestone "$milestone")
-  item_id=$(gh project item-add "$PROJECT_NUMBER" --owner "$OWNER" --url "$url" --format json --jq .id)
-  case "$status" in
-    Done) opt=$OPT_DONE ;; "In Progress") opt=$OPT_DOING ;; *) opt=$OPT_TODO ;;
-  esac
-  gh project item-edit --project-id "$PROJECT_ID" --id "$item_id" \
-     --field-id "$STATUS_FIELD_ID" --single-select-option-id "$opt" >/dev/null
-  if [ "$status" = "Done" ]; then gh issue close "$url" --repo "$REPO" >/dev/null; fi
-  echo "$status | $priority | $title -> $url"
+  url=$(grep -F "$title"$'\t' <<<"$existing" | head -1 | cut -f2 || true)
+  if [ -n "$url" ]; then
+    echo "exists: $title"
+  else
+    url=$(gh issue create --repo "$REPO" --title "$title" --body "$body" \
+          --label "priority:$priority" --label "area:$area" --milestone "$milestone")
+    if [ "$status" = "Done" ]; then gh issue close "$url" --repo "$REPO" >/dev/null; fi
+    echo "$status | $priority | $title -> $url"
+  fi
+  add_to_board "$url" "$status"
 done <<<"$ISSUES"
-echo "board: https://github.com/users/$OWNER/projects/$PROJECT_NUMBER"
+[ "$HAVE_BOARD" = 1 ] && echo "board: https://github.com/users/$OWNER/projects/$PROJECT_NUMBER"
+echo "issues: https://github.com/$REPO/issues?q=is%3Aissue+sort%3Acreated-asc"
