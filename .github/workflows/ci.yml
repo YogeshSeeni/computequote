@@ -1,0 +1,19 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --all-groups
+      - run: make check
+      - name: engine does no I/O
+        run: |
+          ! grep -rnE '^\s*(import|from) (os|sys|io|json|requests|httpx|pathlib|sqlalchemy|urllib)\b' engine/
