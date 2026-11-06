@@ -95,11 +95,10 @@ function Calculator() {
   const derived = useMemo(() => derive(form, gpuSpec), [form, gpuSpec]);
 
   const runEstimate = useCallback(async (f: ScenarioForm, gpu?: GPUSpec) => {
+    // Invalid form: the inline field errors already explain why (the submit
+    // button is disabled in that state; only the URL auto-run reaches here).
     const req = toRequest(f, derive(f, gpu));
-    if (!req) {
-      setError("Fix the highlighted fields first.");
-      return;
-    }
+    if (!req) return;
     abortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac;

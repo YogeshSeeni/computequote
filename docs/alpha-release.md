@@ -1,6 +1,6 @@
 # ComputeQuote — Alpha Release & Task Backlog
 
-<p class="subtitle">CS146S Aut26 · Yogesh Seenichamy · November 5, 2026 · Repo: <a href="https://github.com/YogeshSeeni/computequote">github.com/YogeshSeeni/computequote</a> · Backlog: <a href="BOARD_URL">BOARD_LABEL</a></p>
+<p class="subtitle">CS146S Aut26 · Yogesh Seenichamy · November 5, 2026 · Repo: <a href="https://github.com/YogeshSeeni/computequote">github.com/YogeshSeeni/computequote</a> · Backlog: <a href="https://github.com/users/YogeshSeeni/projects/2">github.com/users/YogeshSeeni/projects/2</a></p>
 
 ## 1. Early working demo
 
@@ -26,11 +26,15 @@ The whole stack from the technical spec runs locally: a pure-Python engine (`eng
 
 ## 2. Documented backlog
 
-The backlog lives in GitHub Issues with a public GitHub Project board: BOARD_LINK_SENTENCE Each issue has a title, description, status (Todo / In Progress / Done), priority label (`priority:high|medium|low`), an area label and a milestone (Alpha Nov 5 or Final Dec 10). Single-person team, so no assignee field.
+The backlog lives in GitHub Issues with a public GitHub Project board: <a href="https://github.com/users/YogeshSeeni/projects/2">github.com/users/YogeshSeeni/projects/2</a> (33 issues, created by `scripts/backlog.sh` so the backlog is reproducible). Each issue has a title, description, status (Todo / In Progress / Done), priority label (`priority:high|medium|low`), an area label and a milestone (Alpha Nov 5 or Final Dec 10). Single-person team, so no assignee field.
 
-ISSUE_COUNTS
+| Status | Count | High | Medium | Low |
+|---|---|---|---|---|
+| Done (alpha) | 10 | 10 | 0 | 0 |
+| In Progress | 2 | 1 | 1 | 0 |
+| Todo | 21 | 8 | 9 | 4 |
 
-<figure><img src="screenshots/BOARD_IMAGE" alt="Backlog board"><figcaption>BOARD_CAPTION</figcaption></figure>
+<figure><img src="screenshots/backlog-board.png" alt="Backlog board"><figcaption>Public GitHub Project board: every issue with status, priority, area and milestone.</figcaption></figure>
 
 Highest-priority next steps: calibrate the engine on more runs and add interleaved pipeline schedules; deploy the API (Fly.io) and web app (Vercel); replace the curated price table with nightly Vast.ai and RunPod collectors into Postgres; ship the validation page.
 

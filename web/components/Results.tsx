@@ -236,7 +236,11 @@ function StatTiles({
       label: "Step time",
       value: perf ? fmtSeconds(perf.step_time_s) : "–",
       sub: perf
-        ? `compute ${fmtSeconds(perf.compute_time_s)} · bubble ${fmtSeconds(perf.bubble_time_s)}`
+        ? `bubble ${fmtPct(perf.bubble_time_s / perf.step_time_s, 0)} · comm ${fmtPct(
+            (perf.tp_comm_time_s + perf.pp_comm_time_s + perf.dp_comm_time_s) /
+              perf.step_time_s,
+            0,
+          )}`
         : "",
     },
     {
@@ -309,7 +313,7 @@ function ProviderTable({ cost }: { cost: CostEstimate }) {
             <thead>
               <tr className="text-left">
                 <Th>Provider</Th>
-                <Th>Billing</Th>
+                <Th className="hidden sm:table-cell">Billing</Th>
                 <Th right>$/GPU-hr</Th>
                 <Th right>Total</Th>
                 <Th right>Observed</Th>
@@ -337,8 +341,13 @@ function ProviderTable({ cost }: { cost: CostEstimate }) {
                           cheapest
                         </Tag>
                       )}
+                      <span className="block text-xs text-ink-3 sm:hidden">
+                        {p.billing}
+                      </span>
                     </Td>
-                    <Td className="text-ink-2">{p.billing}</Td>
+                    <Td className="hidden whitespace-nowrap text-ink-2 sm:table-cell">
+                      {p.billing}
+                    </Td>
                     <Td right num>
                       {fmtUSD(parseDecimal(p.price_usd_per_gpu_hour))}
                     </Td>
@@ -429,11 +438,19 @@ function Section({
   );
 }
 
-function Th({ children, right }: { children: ReactNode; right?: boolean }) {
+function Th({
+  children,
+  right,
+  className = "",
+}: {
+  children: ReactNode;
+  right?: boolean;
+  className?: string;
+}) {
   return (
     <th
       scope="col"
-      className={`eyebrow pb-2 pr-3 font-semibold last:pr-0 ${right ? "text-right" : "text-left"}`}
+      className={`eyebrow whitespace-nowrap pb-2 pr-2.5 font-semibold last:pr-0 sm:pr-3 ${right ? "text-right" : "text-left"} ${className}`}
     >
       {children}
     </th>
@@ -453,7 +470,7 @@ function Td({
 }) {
   return (
     <td
-      className={`py-2 pr-3 align-baseline last:pr-0 ${right ? "text-right" : ""} ${num ? "num" : ""} ${className}`}
+      className={`py-2 pr-2.5 align-baseline last:pr-0 sm:pr-3 ${right ? "text-right" : ""} ${num ? "num whitespace-nowrap" : ""} ${className}`}
     >
       {children}
     </td>

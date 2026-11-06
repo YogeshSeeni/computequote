@@ -228,13 +228,23 @@ function prettyBody(body: string): string {
   if (!body) return "(empty response body)";
   try {
     const parsed: unknown = JSON.parse(body);
-    if (
-      typeof parsed === "object" &&
-      parsed !== null &&
-      "detail" in parsed &&
-      typeof (parsed as { detail: unknown }).detail === "string"
-    ) {
-      return (parsed as { detail: string }).detail;
+    if (typeof parsed === "object" && parsed !== null && "detail" in parsed) {
+      const detail = (parsed as { detail: unknown }).detail;
+      // FastAPI: a string, or a list of strings / Pydantic {loc, msg} errors.
+      if (typeof detail === "string") return detail;
+      if (Array.isArray(detail)) {
+        return detail
+          .map((d: unknown) => {
+            if (typeof d === "string") return d;
+            if (typeof d === "object" && d !== null && "msg" in d) {
+              const { loc, msg } = d as { loc?: unknown[]; msg: unknown };
+              const where = Array.isArray(loc) ? loc.join(".") : "";
+              return where ? `${where}: ${String(msg)}` : String(msg);
+            }
+            return JSON.stringify(d);
+          })
+          .join("\n");
+      }
     }
     return JSON.stringify(parsed, null, 2);
   } catch {

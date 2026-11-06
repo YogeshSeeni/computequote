@@ -28,7 +28,7 @@ def shot(page: Page, name: str, full_page: bool) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--web", default="http://localhost:3000")
-    ap.add_argument("--api", default="http://localhost:8000")
+    ap.add_argument("--api", default="http://127.0.0.1:8000")
     ap.add_argument("--board", default=None, help="public GitHub project URL")
     ap.add_argument("--targets", default="calculator,api,issues")
     args = ap.parse_args()

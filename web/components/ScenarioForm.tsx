@@ -151,7 +151,7 @@ export function ScenarioFormPanel({
           label="Tokens (T)"
           hint={
             derived.totalTokens !== null
-              ? `= ${fmtInt(derived.totalTokens)} tokens`
+              ? `= ${derived.totalTokens.toExponential(2)} tokens`
               : undefined
           }
           error={errors.tokens_t}
@@ -173,7 +173,7 @@ export function ScenarioFormPanel({
           label="Batch (M tokens)"
           hint={
             derived.globalBatchTokens !== null && derived.globalBatchSeqs !== null
-              ? `= ${fmtInt(derived.globalBatchTokens)} tokens · ${fmtInt(derived.globalBatchSeqs)} seqs`
+              ? `= ${fmtInt(derived.globalBatchSeqs)} seqs × ${fmtInt(derived.seqLen)}`
               : undefined
           }
           error={errors.batch_m}
@@ -294,9 +294,7 @@ function Field({
           {error} {action}
         </p>
       ) : hint ? (
-        <p className="num truncate text-xs text-ink-3" title={hint}>
-          {hint}
-        </p>
+        <p className="text-xs text-ink-3 tabular-nums">{hint}</p>
       ) : null}
     </div>
   );

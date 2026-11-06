@@ -53,12 +53,12 @@ export function MemoryBar({ memory }: { memory: MemoryBreakdown }) {
         <span>{over ? `track ${fmtGiB(scale)} · dashed = capacity` : fmtGiB(capacity)}</span>
       </div>
 
-      <dl className="mt-3 grid grid-cols-2 gap-x-5 gap-y-1.5 sm:grid-cols-3">
+      <dl className="mt-3 grid grid-cols-1 gap-x-5 gap-y-1.5 min-[480px]:grid-cols-2 sm:grid-cols-3">
         {SEGMENTS.map((s) => (
           <div key={s.key} className="flex items-center gap-2 text-sm">
             <span className={`h-2.5 w-2.5 shrink-0 rounded-sm ${s.cls}`} />
-            <dt className="text-ink-2">{s.label}</dt>
-            <dd className="num ml-auto">{fmtGiB(memory[s.key])}</dd>
+            <dt className="truncate text-ink-2">{s.label}</dt>
+            <dd className="num ml-auto whitespace-nowrap">{fmtGiB(memory[s.key])}</dd>
           </div>
         ))}
       </dl>
