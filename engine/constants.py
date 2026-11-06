@@ -18,8 +18,9 @@ ACTIVATION_COEFFS = {
     "full": (2, 0),
 }
 
-# §3.2 fraction of peak tensor-core FLOP/s reached by large GEMMs (calibrated, see §7)
-MATMUL_EFFICIENCY = 0.70
+# §3.2 effective fraction of peak FLOP/s over a whole step: large GEMMs (~0.65-0.75) diluted by
+# norms, softmax, elementwise and optimizer kernels. Calibrated on the §6 runs (0.70 -> 0.55).
+MATMUL_EFFICIENCY = 0.55
 
 # §3.4 fraction of data-parallel gradient communication hidden behind backward
 DP_OVERLAP_FRACTION = 0.8

@@ -39,8 +39,9 @@ global_batch_tokens / seq_len` must be an integer.
 ### §1.4 ParallelConfig
 `tp, pp, dp, micro_batch_seqs`. Constraints: `tp·pp·dp = n_gpus`;
 `tp | gpus_per_node` (TP stays inside a node); `tp | h_kv` (each TP rank owns
-whole KV heads); `pp | L`; `m = global_batch_seqs / (dp · micro_batch_seqs)` is
-an integer ≥ 1. Pipeline schedule is 1F1B.
+whole KV heads); `pp ≤ L` (stages may be uneven: the largest stage holds
+`ceil(L / pp)` layers and governs memory and time); `m = global_batch_seqs /
+(dp · micro_batch_seqs)` is an integer ≥ 1. Pipeline schedule is 1F1B.
 
 ## §2 Memory model (bytes per GPU at peak)
 
@@ -70,8 +71,8 @@ tensor), no dropout, gated FFN. Derived from Korthikanti et al. 2022 §4.
 | full       | `2·d / tp` + one layer of `none` transient  | only layer inputs kept; one layer rebuilt at a time |
 
 ### §2.3 Activations at peak
-- `layers_per_gpu = L / pp`; micro-batches resident on the first stage under
-  1F1B: `min(pp, m)`.
+- `layers_per_gpu = ceil(L / pp)` (largest stage); micro-batches resident on
+  the first stage under 1F1B: `min(pp, m)`.
 - `activation_bytes = layers_per_gpu · min(pp, m) · b · s · per_token_per_layer`
   (+ for `full`: `b · s · (18·d + 8·d_ff) · act_bytes/2 / tp` once).
 - Logits on the last stage in fp32: `logits_bytes = b · s · V · 4 / tp`.
@@ -129,7 +130,7 @@ NVLink if `n_gpus ≤ gpus_per_node`, else inter-node. Exposed time
 - `tokens_per_s = global_batch_tokens / t_step`.
 
 ## §4 Config search
-Enumerate `tp ∈ divisors(gpus_per_node) ∩ divisors(h_kv)`, `pp ∈ divisors(L)`
+Enumerate `tp ∈ divisors(gpus_per_node) ∩ divisors(h_kv)`, `pp ∈ 1..L`
 with `tp·pp | n_gpus`, `dp = n_gpus / (tp·pp)`, `micro_batch_seqs ∈
 MICRO_BATCH_CANDIDATES` with `global_batch_seqs % (dp·b) = 0`; if `zero_stage`
 or `recompute` is `auto`, enumerate all values. Evaluate §2 → infeasible configs
@@ -154,7 +155,11 @@ ranked by ascending `step_time_s`. Ties break toward smaller `pp`, then smaller
 sequence length and global batch. For each run the search picks the best config
 and `gpu_hours` is compared with the reported figure. Target: within ±25%.
 Reported figures include restarts, evaluation and checkpointing, which v0.1
-does not model, so predictions are expected to run low.
+does not model, so predictions are expected to run low. Result at v0.1 with
+`MATMUL_EFFICIENCY = 0.55`: Llama 2 7B/13B/70B and Llama 3.1 405B within ±25%
+(ratios 0.92, 0.86, 0.96, 1.11); Llama 3.1 8B (0.38) and 70B (0.67) miss because
+the model-card GPU-hours cover every training stage, not just the 15T-token
+pretraining run that is modeled.
 
 ## §7 Assumptions (engine/constants.py)
 | constant | value | why |
@@ -162,7 +167,7 @@ does not model, so predictions are expected to run low.
 | `BYTES_PER_PARAM_*` | 2 / 2 / 12 | mixed-precision AdamW, Megatron/ZeRO convention |
 | `FRAMEWORK_OVERHEAD_BYTES` | 4 GiB | CUDA context, NCCL buffers, fragmentation |
 | `ACTIVATION_COEFFS` | see §2.2 | Korthikanti et al. 2022 adapted to gated FFN, no dropout |
-| `MATMUL_EFFICIENCY` | 0.70 | large bf16 GEMMs on H100/A100; calibrated in §6 |
+| `MATMUL_EFFICIENCY` | 0.55 | effective fraction of peak over a whole step (GEMMs ~0.65–0.75 diluted by memory-bound kernels); started at 0.70, calibrated to 0.55 on the §6 runs on 2026-11-05 |
 | `DP_OVERLAP_FRACTION` | 0.8 | gradient all-reduce overlapped with backward |
 | `TP_OVERLAP_FRACTION` | 0.0 | TP collectives sit on the critical path |
 | `MICRO_BATCH_CANDIDATES` | 1…32 | powers of two |

@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+/* Neutral "engineering calculator" palette. One accent (green) for the
+   feasible verdict and the CTA; red only for infeasible; amber for warnings. */
+:root {
+  --bg: #f3f3f0;
+  --surface: #ffffff;
+  --surface-2: #e9e9e5;
+  --line: #d6d6d1;
+  --ink: #17191c;
+  --ink-2: #5d6168;
+  --ink-3: #8f939a;
+  --accent: #0f7a4f;
+  --accent-soft: #e2f3ea;
+  --accent-ink: #ffffff;
+  --danger: #b3261e;
+  --danger-soft: #fbe9e7;
+  --warn: #8a5a00;
+  --warn-soft: #fff3d1;
+  --focus: #0f7a4f66;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111213;
+    --surface: #1a1c1e;
+    --surface-2: #25282b;
+    --line: #34383c;
+    --ink: #e9eaeb;
+    --ink-2: #a4a8ae;
+    --ink-3: #74787e;
+    --accent: #3fd392;
+    --accent-soft: #15301f;
+    --accent-ink: #06160d;
+    --danger: #ff7566;
+    --danger-soft: #3a1b18;
+    --warn: #f0c35a;
+    --warn-soft: #3a2f10;
+    --focus: #3fd39266;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-focus: var(--focus);
+
+  /* Memory-bar segments: blues for model state (weights/grads/optimizer),
+     ambers for activations/logits, grey for overhead. */
+  --color-mem-weights: #1e4fc2;
+  --color-mem-grads: #3b7ff2;
+  --color-mem-optimizer: #93bdf7;
+  --color-mem-activations: #d97b1a;
+  --color-mem-logits: #f2bf4a;
+  --color-mem-overhead: #9a9ea5;
+
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, Consolas,
+    monospace;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Numeric cells: monospace + tabular figures so columns line up. */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Form controls */
+.field {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0.5rem 0.65rem;
+  font-size: 0.9rem;
+  line-height: 1.25rem;
+}
+.field:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus);
+}
+.field[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+input[type="number"].field {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+select.field {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-2) 50%),
+    linear-gradient(135deg, var(--ink-2) 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) 50%,
+    calc(100% - 11px) 50%;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 2rem;
+}
+
+/* Section eyebrow heading */
+.eyebrow {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
