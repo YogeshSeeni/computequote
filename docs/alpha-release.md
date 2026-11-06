@@ -43,3 +43,16 @@ Board: <a href="https://github.com/users/YogeshSeeni/projects/2">github.com/user
 **Challenges.** The model recalled GPU specs, provider prices and published GPU-hour figures from memory, so the price table is labelled approximate and the validation table carries assumed cluster sizes; both need human verification before any real decision, which is why live collectors and a public validation page are high priority. Unit discipline needed a rule (`memory_bytes`, `step_time_s`) plus a mypy strict gate. And the agents are optimistic by default: the first efficiency constant gave 45–55% MFU where published runs imply 25–43%, and only the golden tests caught it.
 
 **Insight.** Treating the modeling spec as the contract between human and agents beat reviewing code line by line: when a number looked wrong, the fix was a spec sentence plus a test, and the agents did the rest.
+
+## 4. Communication & presentation
+
+**How progress is communicated.** Requirements and status reach humans and agents through the same artifacts: `docs/MODELING.md` (equations, units, invariants), `CLAUDE.md` (layout and rules), `docs/prompts.md` (prompt log with before/after results), the public project board, and the README's three-command run instructions. For non-technical readers the calculator is the status report: a green or red verdict, six headline numbers and a cost-by-provider table. Stakeholders get this document and share links, not code.
+
+**Demo-day talk (5–8 min, one live scenario), unchanged from the proposal and mapped to alpha status:**
+
+- **Context (1 min):** why "6 × params × tokens ÷ peak" spreadsheets go wrong, and for whom. *Ready.*
+- **Demo (3 min):** estimate a 70B run end to end, show the memory verdict and config, open its share link, compare providers, show the validation page. *Calculator and share link ready locally; validation page and deployed URL are backlog (#13, #18).*
+- **AI integration (1–2 min):** the spec-driven agent workflow with before/after prompts from `docs/prompts.md`. *Ready; the log grows each milestone.*
+- **Reflection (1–2 min):** results vs success criteria (±25% on ≥5 runs, p95 < 1 s, ≥8 providers, < 2 min to an estimate), where AI helped or failed, roadmap. *Today: 4/6 runs within tolerance, 23 ms search, 9 curated providers; live prices and more runs needed by Dec 10.*
+
+The final deliverable adds the deployed app so the audience can open the share link on their own devices during the talk.

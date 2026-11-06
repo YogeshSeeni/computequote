@@ -18,7 +18,7 @@ REPO = "https://github.com/YogeshSeeni/computequote"
 HERO_CLIP: FloatRect = {"x": 0, "y": 0, "width": 1440, "height": 740}
 COST_CLIP: FloatRect = {"x": 575, "y": 740, "width": 685, "height": 440}
 BOARD_CLIP: FloatRect = {"x": 0, "y": 0, "width": 1440, "height": 660}
-ISSUES_CLIP: FloatRect = {"x": 270, "y": 334, "width": 1090, "height": 370}
+ISSUES_CLIP: FloatRect = {"x": 270, "y": 334, "width": 1090, "height": 300}
 SCENARIO = (
     "?model=llama-3-70b&gpu=h100-sxm-80gb&n_gpus=1024&tokens_t=15&seq_len=8192"
     "&batch_m=8.388608&precision=bf16&zero=auto&recompute=auto"
