@@ -30,7 +30,7 @@ every engine function cites the section it implements.
 
 ## Attribution
 Commits and PRs carry only the repository owner's identity. Do not add
-`Co-Authored-By` trailers or "Generated with ..." lines anywhere in this repo.
+co-author trailers or generated-by lines anywhere in this repo.
 
 ## Style
 Python 3.12, Pydantic v2, type hints everywhere, mypy strict, ruff. Keep

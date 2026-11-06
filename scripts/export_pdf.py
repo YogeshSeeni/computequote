@@ -23,6 +23,8 @@ def main() -> None:
             str(MD),
             "--standalone",
             "--embed-resources",
+            "--resource-path",
+            str(DOCS),
             "--css",
             str(DOCS / "style.css"),
             "--metadata",

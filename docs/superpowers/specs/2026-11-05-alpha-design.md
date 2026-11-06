@@ -18,7 +18,7 @@ Decisions already made with the user:
 Environment: uv 0.11 with Python 3.12.13 available (`uv python list`), node 22 + pnpm 10, pandoc 3.9, docker, Playwright chromium cached, `gh` logged in as YogeshSeeni (**token lacks `project` scope** — user must run `gh auth refresh -s project,read:project` once).
 
 ## Hard rules from the user
-- **No Claude attribution anywhere in the project**: no `Co-Authored-By: Claude …` trailer on any commit, no "Generated with Claude Code" line in PR descriptions, issues, or docs. Commits are authored solely by the user's git identity. Record this in `CLAUDE.md` so future sessions follow it, and save it to persistent memory right after plan approval.
+- **No AI attribution anywhere in the project**: no co-author trailers on commits, no generated-by lines in PR descriptions, issues, or docs. Commits carry only the user's git identity. Recorded in `CLAUDE.md`.
 
 ## Timeline (hard checkpoints)
 

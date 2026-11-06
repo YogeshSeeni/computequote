@@ -235,7 +235,8 @@ function prettyBody(body: string): string {
       if (Array.isArray(detail)) {
         return detail
           .map((d: unknown) => {
-            if (typeof d === "string") return d;
+            // Engine ValueErrors arrive as ": Value error, ..." (empty loc).
+            if (typeof d === "string") return d.replace(/^\s*:\s*/, "");
             if (typeof d === "object" && d !== null && "msg" in d) {
               const { loc, msg } = d as { loc?: unknown[]; msg: unknown };
               const where = Array.isArray(loc) ? loc.join(".") : "";
